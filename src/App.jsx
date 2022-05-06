@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Header from './components/Header'
 import Modal from './components/Modal'
 import ListadoGastos from './components/ListadoGastos'
+import Filtros from './components/Filtros'
 import { generarId } from './helpers'
 import IconoNuevoGasto from './img/nuevo-gasto.svg'
 
@@ -18,6 +19,9 @@ function App() {
     localStorage.getItem('gastos') ? JSON.parse(localStorage.getItem('gastos')) : []
   )
   const [gastoEditar, setGastoEditar] = useState({})
+
+  const [filtro, setFiltro] = useState('')
+  const [gastosFiltrados, setGatosFiltrados] = useState([])
 
   useEffect(() => {
     if (Object.keys(gastoEditar).length > 0) {
@@ -37,18 +41,20 @@ function App() {
   }, [gastos])
 
   useEffect(() => {
-    const presupuestoLS = Number(localStorage.getItem('presupuesto')) ?? 0
+    /* console.log(gastos) */
+    const gastosFiltrados = gastos.filter(gasto => gasto.categoria === filtro)
+    setGatosFiltrados(gastosFiltrados)
+  }, [filtro])
 
+  useEffect(() => {
+    const presupuestoLS = Number(localStorage.getItem('presupuesto')) ?? 0
     if (presupuestoLS > 0) {
       setIsValidPresupuesto(true)
     } else {
       setIsValidPresupuesto(false)
     }
-
     const gastosLS = JSON.parse(localStorage.getItem('gastos')) ?? []
-
     setGastos(gastosLS)
-
   }, [])
 
 
@@ -91,19 +97,29 @@ function App() {
     <div className={modal ? 'fijar' : ''}>
       <Header
         gastos={gastos}
+        setGastos={setGastos}
         presupuesto={presupuesto}
         setPresupuesto={setPresupuesto}
         isValidPresupuesto={isValidPresupuesto}
         setIsValidPresupuesto={setIsValidPresupuesto}
       />
 
+
+
       {isValidPresupuesto && (
         <>
           <main>
+            <Filtros
+              filtro={filtro}
+              setFiltro={setFiltro}
+            />
             <ListadoGastos
               setGastoEditar={setGastoEditar}
               gastos={gastos}
-              eliminarGasto={eliminarGasto} />
+              eliminarGasto={eliminarGasto}
+              filtro={filtro}
+              gastosFiltrados={gastosFiltrados}
+            />
           </main>
           <div className="nuevo-gasto">
             <img
